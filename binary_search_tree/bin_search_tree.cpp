@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include <queue>
 
 
 struct Node {
@@ -158,6 +159,44 @@ void erase(Node* root, int val) {
 
 }
 
+void mirror_bst_recursive(Node* root) {
+  if (root == nullptr) {
+    return;
+  }
+
+  Node* tmp = root->left;
+  root->left = root->right;
+  root->right = tmp;
+
+  mirror_bst_recursive(root->left);
+  mirror_bst_recursive(root->right);
+}
+
+void mirror_bst_iterative(Node* root) {
+  if (root == nullptr) {
+    return;
+  }
+
+  std::queue<Node*> queue;
+  queue.push(root);
+  while (!queue.empty()) {
+    Node* cur = queue.front();
+    queue.pop();
+
+    Node* tmp = cur->left;
+    cur->left = cur->right;
+    cur->right = tmp;
+
+    if (cur->left) {
+      queue.push(cur->left);
+    }
+
+    if (cur->right) {
+      queue.push(cur->right);
+    }
+  }
+}
+
 
 int main() {
   Node* root = new Node();
@@ -183,6 +222,16 @@ int main() {
   std::cout << "MIN VAL: " << (min_node ? min_node->val : -1) << std::endl;
 
   erase(root, 16);
+  printTree(root);
+
+  std::cout << "--------------------------------" << std::endl;
+
+  mirror_bst_recursive(root);
+  printTree(root);
+
+  std::cout << "--------------------------------" << std::endl;
+
+  mirror_bst_iterative(root);
   printTree(root);
 
   return 0;
