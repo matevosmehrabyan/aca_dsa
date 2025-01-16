@@ -1,6 +1,8 @@
 #include <iostream>
 #include <limits>
 #include <queue>
+#include <stack>
+#include <vector>
 
 
 struct Node {
@@ -52,7 +54,7 @@ Node* insert(Node* root, int val) {
   }
 }
 
-const Node* search(const Node* root, int val) {
+Node* search(Node* root, int val) {
   if (root == nullptr) {
     return nullptr;
   }
@@ -91,7 +93,7 @@ Node* get_max(Node* root) {
     return nullptr;
   }
 
-  return root->right ? get_max(root->right) : root;
+  return root->right != nullptr ? get_max(root->right) : root;
 }
 
 void erase(Node* root, int val) {
@@ -198,6 +200,73 @@ void mirror_bst_iterative(Node* root) {
 }
 
 
+void inorder_traverse_recursive(Node* root) {
+  if (root == nullptr) {
+    return;
+  }
+
+  inorder_traverse_recursive(root->left);
+  std::cout << root->val << " ";
+  inorder_traverse_recursive(root->right);
+}
+
+
+void postorder_traverse_recursive(Node* root) {
+  if (root == nullptr) {
+    return;
+  }
+
+  postorder_traverse_recursive(root->right);
+  std::cout << root->val << " ";
+  postorder_traverse_recursive(root->left);
+}
+
+void preorder_traverse_recursive(Node* root) {
+  if (root == nullptr) {
+    return;
+  }
+
+  std::cout << root->val << " ";
+  preorder_traverse_recursive(root->left);
+  preorder_traverse_recursive(root->right);
+}
+
+Node* get_prev(Node* node) {
+  if (node == nullptr) {
+    return nullptr;
+  }
+
+  if (node->left != nullptr) {
+    return get_max(node->left);
+  }
+
+  if (node->parent == nullptr)  {
+    return nullptr;
+  }
+
+  while (node->parent != nullptr && node == node->parent->left) {
+    node = node->parent;
+  }
+
+  return node->parent;
+}
+
+
+Node* batch_construct(std::vector<int>& elements, int start, int end) {
+  if (start > end) {
+    return nullptr;
+  }
+
+  Node* cur = new Node();
+  
+  int mid = start + (end - start) / 2;
+  cur->val = elements[mid];
+  cur->left = batch_construct(elements, start, mid - 1);
+  cur->right = batch_construct(elements, mid + 1, end);
+  return cur;
+}
+
+
 int main() {
   Node* root = new Node();
   root->val = 32;
@@ -221,18 +290,26 @@ int main() {
   std::cout << "MAX VAL: " << (max_node ? max_node->val : -1) << std::endl;
   std::cout << "MIN VAL: " << (min_node ? min_node->val : -1) << std::endl;
 
-  erase(root, 16);
+  // erase(root, 16);
   printTree(root);
 
   std::cout << "--------------------------------" << std::endl;
 
-  mirror_bst_recursive(root);
-  printTree(root);
+  // mirror_bst_recursive(root);
+  // printTree(root);
 
-  std::cout << "--------------------------------" << std::endl;
+  // std::cout << "--------------------------------" << std::endl;
 
-  mirror_bst_iterative(root);
-  printTree(root);
+  // mirror_bst_iterative(root);
+  // printTree(root);
+
+  Node* cur = search(root, 17);
+  Node* prev = get_prev(cur);
+  std::cout << "CUR: " << cur->val << " PREV: " << (prev != nullptr ? prev->val : -1) << std::endl;
+
+  std::vector<int> elems = {1,2,3,4,5,6,7};
+  Node* new_root = batch_construct(elems, 0, elems.size() - 1);
+  printTree(new_root);
 
   return 0;
 }
