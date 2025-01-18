@@ -3,6 +3,8 @@
 #include <queue>
 #include <stack>
 #include <vector>
+#include <limits>
+#include <algorithm>
 
 
 struct Node {
@@ -231,6 +233,30 @@ void preorder_traverse_recursive(Node* root) {
   preorder_traverse_recursive(root->right);
 }
 
+void preorder_traverse_iterative(Node* root) {
+  if (!root) {
+    return;
+  }
+
+  std::stack<Node*> traverse_stack;
+  traverse_stack.push(root);
+  while (!traverse_stack.empty()) {
+    Node* cur = traverse_stack.top();
+    traverse_stack.pop();
+
+    std::cout << cur->val << " ";
+    if (cur->left) {
+      traverse_stack.push(cur->left);
+    }
+
+    if (cur->right) {
+      traverse_stack.push(cur->right);
+    }
+  }
+
+  std::cout << std::endl;
+}
+
 Node* get_prev(Node* node) {
   if (node == nullptr) {
     return nullptr;
@@ -264,6 +290,38 @@ Node* batch_construct(std::vector<int>& elements, int start, int end) {
   cur->left = batch_construct(elements, start, mid - 1);
   cur->right = batch_construct(elements, mid + 1, end);
   return cur;
+}
+
+std::pair<int, int> get_min_max_to_leafs(Node* node) {
+  if (!node->left && !node->right) {
+    return {1, 1};
+  }
+
+  int min = std::numeric_limits<int>::max();
+  int max = 0;
+
+  if (node->right) {
+    auto cur_min_max = get_min_max_to_leafs(node->right);
+    min = std::min(min, cur_min_max.first);
+    max = std::max(max, cur_min_max.second);
+  }
+
+  if (node->left) {
+    auto cur_min_max = get_min_max_to_leafs(node->left);
+    min = std::min(min, cur_min_max.first);
+    max = std::max(max, cur_min_max.second);
+  }
+
+  return {min + 1, max + 1};
+}
+
+double balanceness(Node* root) {
+  if (!root) {
+    return 0;
+  }
+
+  auto min_max = get_min_max_to_leafs(root);
+  return static_cast<double>(min_max.first) / static_cast<double>(min_max.second);
 }
 
 
@@ -310,6 +368,9 @@ int main() {
   std::vector<int> elems = {1,2,3,4,5,6,7};
   Node* new_root = batch_construct(elems, 0, elems.size() - 1);
   printTree(new_root);
+  preorder_traverse_iterative(new_root);
+
+  std::cout << "Balanceness: " << balanceness(new_root) << std::endl;
 
   return 0;
 }
